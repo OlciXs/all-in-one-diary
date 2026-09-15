@@ -1,0 +1,15 @@
+# Node / NestJS
+backend/node_modules/
+backend/dist/
+backend/.env
+backend/prisma/*.db
+
+# Flutter
+mobile/.dart_tool/
+mobile/build/
+mobile/.packages
+
+# System & IDE
+.DS_Store
+.idea/
+.vscode/
