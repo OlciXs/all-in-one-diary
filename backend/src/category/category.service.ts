@@ -16,25 +16,15 @@ export class CategoryService {
     });
   }
 
-  async findAll() {
+  async findAll(userId: number) {
     return this.prisma.category.findMany({
-      include: {
-        user: true,
-        entries: true,
-      },
-      orderBy: {
-        id: 'desc',
-      },
+      where: {userId},
     });
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId: number) {
     const category = await this.prisma.category.findUnique({
-      where: { id },
-      include: {
-        user: true,
-        entries: true,
-      },
+      where: {id, userId},
     });
 
     if (!category) {
@@ -44,8 +34,8 @@ export class CategoryService {
     return category;
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    await this.findOne(id);
+  async update(id: number, updateCategoryDto: UpdateCategoryDto, userId: number) {
+    await this.findOne(id, userId);
 
     return this.prisma.category.update({
       where: { id },
@@ -53,8 +43,9 @@ export class CategoryService {
     });
   }
 
-  async remove(id: number) {
-    await this.findOne(id);
+
+  async remove(id: number, userId: number) {
+    await this.findOne(id, userId);
 
     return this.prisma.category.delete({
       where: { id },

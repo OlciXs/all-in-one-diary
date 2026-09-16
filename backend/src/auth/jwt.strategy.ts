@@ -22,6 +22,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Użytkownik nie istnieje.');
     }
 
-    return user;
+    // Mapujemy id na userId, aby pasowało do pozostałej części aplikacji
+    return {
+      ...user,
+      userId: user.id,
+    };
   }
 }

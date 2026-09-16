@@ -1,53 +1,39 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  ParseIntPipe,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ParseIntPipe } from '@nestjs/common';
 import { EntryService } from './entry.service';
 import { CreateEntryDto } from './dto/create-entry.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
-@ApiTags('entries') // swagger pokazuje
-@ApiBearerAuth()  
+@ApiTags('entries')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('entries')
 export class EntryController {
   constructor(private readonly entryService: EntryService) {}
 
   @Post()
-  create(@Req() req, @Body() createEntryDto: CreateEntryDto) {
-    return this.entryService.create(createEntryDto, req.user.id);
+  create(@Body() createEntryDto: CreateEntryDto, @Req() req) {
+    return this.entryService.create(createEntryDto, req.user.userId);
   }
 
   @Get()
-  findAll() {
-    return this.entryService.findAll();
+  findAll(@Req() req) {
+    return this.entryService.findAll(req.user.userId);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.entryService.findOne(id);
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.entryService.findOne(id, req.user.userId);
   }
 
   @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateEntryDto: UpdateEntryDto,
-  ) {
-    return this.entryService.update(id, updateEntryDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateEntryDto: UpdateEntryDto, @Req() req) {
+    return this.entryService.update(id, updateEntryDto, req.user.userId);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.entryService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.entryService.remove(id, req.user.userId);
   }
 }
