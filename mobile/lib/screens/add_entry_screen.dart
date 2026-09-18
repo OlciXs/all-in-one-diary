@@ -71,7 +71,6 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final categoryProvider = Provider.of<CategoryProvider>(context);
     final entryProvider = Provider.of<EntryProvider>(context);
 

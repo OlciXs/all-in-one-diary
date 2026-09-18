@@ -25,7 +25,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _submit() async {
-    // 1. Sprawdzamy czy formularz jest poprawnie wypełniony
     if (!_formKey.currentState!.validate()) {
       return;
     }
