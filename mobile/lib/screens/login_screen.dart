@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
+import '../providers/theme_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,6 +25,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _submit() async {
+    // 1. Sprawdzamy czy formularz jest poprawnie wypełniony
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
@@ -48,63 +53,94 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      print('BŁĄD WYJĄTKU: $e');
+      // print('BŁĄD WYJĄTKU: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
+    final theme = Theme.of(context); // Pobieramy aktualny motyw
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Logowanie')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextFormField(
-                controller: _loginController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Wpisz email' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Hasło',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Wpisz hasło' : null,
-              ),
-              const SizedBox(height: 24),
-              auth.isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _submit,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(50),
-                      ),
-                      child: const Text('Zaloguj się'),
-                    ),
-              TextButton(
+      appBar: AppBar(
+        actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              final isDark = themeProvider.isDarkMode(context);
+              return IconButton(
+                icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                tooltip: 'Zmień motyw',
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (_) => const RegisterScreen()),
-                  );
+                  themeProvider.toggleTheme(!isDark);
                 },
-                child: const Text('Nie masz konta? Zarejestruj się'),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.lock_outline_rounded,
+                    size: 64,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(height: 32),
+                  TextFormField(
+                    controller: _loginController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: Icon(Icons.email_outlined),
+                    ),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Wpisz email' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: true, //te kropki w polu hasła
+                    decoration: const InputDecoration(
+                      labelText: 'Hasło',
+                      prefixIcon: Icon(Icons.lock_outlined),
+                    ),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Wpisz hasło' : null,
+                  ),
+                  const SizedBox(height: 24),
+                  auth.isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: _submit,
+                          child: const Text(
+                            'Zaloguj się',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => const RegisterScreen()),
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.secondary, // Kolor z motywu
+                    ),
+                    child: const Text('Nie masz konta? Zarejestruj się!'),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
