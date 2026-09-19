@@ -17,19 +17,28 @@ model User {
 }
 
 model Category {
-  id      Int     @id @default(autoincrement())
-  name    String
-  userId  Int
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  entries Entry[]
+  id                  Int      @id @default(autoincrement())
+  name                String
+  color               String   @default("#2196F3") // Domyślnie niebieski HEX
+  hasContent          Boolean  @default(true)
+  hasPhotos           Boolean  @default(true)
+  hasDate             Boolean  @default(true)
+  defaultToCurrentDate Boolean @default(true)
+  allowTimeRange      Boolean  @default(false)
+  userId              Int
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries             Entry[]
 }
 
 model Entry {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   title      String
-  content    String
+  content    String?
+  startDate  DateTime  @default(now())
+  endDate    DateTime?
+  isAllDay   Boolean   @default(true)
   userId     Int
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }

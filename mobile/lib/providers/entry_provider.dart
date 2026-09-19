@@ -16,56 +16,58 @@ class EntryProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  // Filtrowanie wpisów po kategorii lokalnie w pamięci
   List<Entry> getEntriesByCategoryId(int categoryId) {
     return _entries.where((entry) => entry.categoryId == categoryId).toList();
   }
 
-Future<void> fetchEntries() async {
-  _isLoading = true;
-  _errorMessage = null;
-  notifyListeners();
-
-  final token = await _storageService.getToken();
-  if (token == null) {
-    debugPrint('❌ [EntryProvider] Brak tokena w pamięci!');
-    _isLoading = false;
+  /// Czyszczenie wpisów powiązanych z usuniętą kategorią ze stanu lokalnego
+  void removeEntriesByCategoryId(int categoryId) {
+    _entries.removeWhere((entry) => entry.categoryId == categoryId);
     notifyListeners();
-    return;
   }
 
-  try {
-    debugPrint('🚀 [EntryProvider] Wysyłam zapytanie do serwera...');
-    final response = await http.get(
-      Uri.parse('$_baseUrl/entries'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
+  Future<void> fetchEntries() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
-    debugPrint('📡 [EntryProvider] Status kod: ${response.statusCode}');
-    debugPrint('📦 [EntryProvider] Odpowiedź z serwera: ${response.body}');
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
-      _entries = data.map((json) => Entry.fromJson(json)).toList();
-      debugPrint('✅ [EntryProvider] Pobrano ${_entries.length} wpisów.');
-    } else {
-      _errorMessage = 'Nie udało się pobrać wpisów';
+    final token = await _storageService.getToken();
+    if (token == null) {
+      _isLoading = false;
+      notifyListeners();
+      return;
     }
-  } catch (e) {
-    debugPrint('❌ [EntryProvider] Błąd połączenia/parsowania: $e');
-    _errorMessage = 'Błąd połączenia z serwerem';
-  } finally {
-    _isLoading = false;
-    notifyListeners();
+
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/entries'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        _entries = data.map((json) => Entry.fromJson(json)).toList();
+      } else {
+        _errorMessage = 'Nie udało się pobrać wpisów';
+      }
+    } catch (e) {
+      _errorMessage = 'Błąd połączenia z serwerem';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
-}
 
   Future<bool> addEntry({
     required String title,
-    required String content,
+    String? content,
+    required DateTime startDate,
+    DateTime? endDate,
+    bool isAllDay = true,
     required int categoryId,
   }) async {
     _isLoading = true;
@@ -83,12 +85,15 @@ Future<void> fetchEntries() async {
         body: jsonEncode({
           'title': title,
           'content': content,
+          'startDate': startDate.toIso8601String(),
+          'endDate': endDate?.toIso8601String(),
+          'isAllDay': isAllDay,
           'categoryId': categoryId,
         }),
       );
 
       if (response.statusCode == 201) {
-        await fetchEntries(); // Odświeżamy listę wpisów po dodaniu nowego
+        await fetchEntries();
         return true;
       } else {
         _errorMessage = 'Błąd podczas zapisywania wpisu';

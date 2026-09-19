@@ -18,13 +18,13 @@ export class CategoryService {
 
   async findAll(userId: number) {
     return this.prisma.category.findMany({
-      where: {userId},
+      where: { userId },
     });
   }
 
   async findOne(id: number, userId: number) {
-    const category = await this.prisma.category.findUnique({
-      where: {id, userId},
+    const category = await this.prisma.category.findFirst({
+      where: { id, userId },
     });
 
     if (!category) {
@@ -35,6 +35,7 @@ export class CategoryService {
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto, userId: number) {
+    // Sprawdzamy czy kategoria istnieje i należy do użytkownika
     await this.findOne(id, userId);
 
     return this.prisma.category.update({
@@ -43,8 +44,8 @@ export class CategoryService {
     });
   }
 
-
   async remove(id: number, userId: number) {
+    // Sprawdzamy czy kategoria istnieje i należy do użytkownika
     await this.findOne(id, userId);
 
     return this.prisma.category.delete({

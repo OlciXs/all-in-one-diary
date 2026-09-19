@@ -8,7 +8,6 @@ export class EntryService {
   constructor(private prisma: PrismaService) {}
 
   async create(createEntryDto: CreateEntryDto, userId: number) {
-    //Sprawdzamy, czy kategoria istnieje I należy do tego użytkownika
     const category = await this.prisma.category.findFirst({
       where: { id: createEntryDto.categoryId, userId },
     });
@@ -17,11 +16,23 @@ export class EntryService {
       throw new BadRequestException('Wybrana kategoria nie istnieje');
     }
 
-    //Tworzymy wpis przypisany do usera
+    let startDate = createEntryDto.startDate;
+    if (!startDate && category.defaultToCurrentDate) {
+      startDate = new Date();
+    }
+
     return this.prisma.entry.create({
       data: {
-        ...createEntryDto,
+        title: createEntryDto.title,
+        content: createEntryDto.content, // opcjonalne (string | undefined)
+        startDate: startDate ?? new Date(),
+        endDate: createEntryDto.endDate,
+        isAllDay: createEntryDto.isAllDay ?? true,
         userId,
+        categoryId: createEntryDto.categoryId,
+      },
+      include: {
+        category: true,
       },
     });
   }
@@ -29,7 +40,8 @@ export class EntryService {
   async findAll(userId: number) {
     return this.prisma.entry.findMany({
       where: { userId },
-      include: { category: true }, // Dołączamy informacje o kategorii
+      include: { category: true },
+      orderBy: { startDate: 'desc' },
     });
   }
 
@@ -45,10 +57,8 @@ export class EntryService {
   }
 
   async update(id: number, updateEntryDto: UpdateEntryDto, userId: number) {
-    // Sprawdzamy, czy wpis w ogóle istnieje I czy należy do zalogowanego użytkownika
     await this.findOne(id, userId);
 
-    // Jeśli użytkownik chce zmienić kategorię wpisu, sprawdzamy czy nowa kategoria należy do niego
     if (updateEntryDto.categoryId) {
       const category = await this.prisma.category.findFirst({
         where: { id: updateEntryDto.categoryId, userId },
@@ -58,10 +68,10 @@ export class EntryService {
       }
     }
 
-    //Wykonujemy bezpieczną aktualizację
     return this.prisma.entry.update({
       where: { id },
       data: updateEntryDto,
+      include: { category: true },
     });
   }
 

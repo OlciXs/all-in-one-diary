@@ -23,6 +23,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   Widget build(BuildContext context) {
     final categoryProvider = Provider.of<CategoryProvider>(context);
 
+    //sortowanie alfabetyczne
+    final sortedCategories = List.from(categoryProvider.categories)
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Moje Kategorie'),
@@ -37,7 +41,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
       body: categoryProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : categoryProvider.categories.isEmpty
+          : sortedCategories.isEmpty
               ? const Center(
                   child: Text('Brak kategorii. Dodaj pierwszą!'),
                 )
@@ -45,13 +49,19 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 600),
                     child: ListView.builder(
-                      padding: const EdgeInsets.all(16.0),
-                      itemCount: categoryProvider.categories.length,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, 
+                        horizontal: 16.0,
+                      ),
+                      itemCount: sortedCategories.length,
                       itemBuilder: (context, index) {
-                        final category = categoryProvider.categories[index];
+                        final category = sortedCategories[index];
                         return Card(
                           clipBehavior: Clip.antiAlias,
-                          margin: const EdgeInsets.all(16.0),
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 4.0, 
+                            horizontal: 0.0,
+                          ), 
                           child: ListTile(
                             leading: const Icon(Icons.folder_outlined),
                             title: Text(
