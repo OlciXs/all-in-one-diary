@@ -47,7 +47,6 @@ class EntryProvider with ChangeNotifier {
         },
       );
 
-
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         _entries = data.map((json) => Entry.fromJson(json)).toList();
@@ -97,6 +96,38 @@ class EntryProvider with ChangeNotifier {
         return true;
       } else {
         _errorMessage = 'Błąd podczas zapisywania wpisu';
+      }
+    } catch (e) {
+      _errorMessage = 'Błąd połączenia z serwerem';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return false;
+  }
+
+  /// Metoda do usuwania pojedynczego wpisu po jego ID
+  Future<bool> deleteEntry(int id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final token = await _storageService.getToken();
+      final response = await http.delete(
+        Uri.parse('$_baseUrl/entries/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _entries.removeWhere((entry) => entry.id == id);
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = 'Nie udało się usunąć wpisu';
       }
     } catch (e) {
       _errorMessage = 'Błąd połączenia z serwerem';

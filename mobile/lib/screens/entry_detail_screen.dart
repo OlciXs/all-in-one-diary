@@ -1,10 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/entry.dart';
+import '../providers/entry_provider.dart';
 
 class EntryDetailScreen extends StatelessWidget {
   final Entry entry;
 
   const EntryDetailScreen({super.key, required this.entry});
+
+  Future<void> _confirmDeleteEntry(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Usuń wpis'),
+        content: Text(
+          'Czy na pewno chcesz usunąć wpis "${entry.title}"? Ta operacja jest nieodwracalna.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Anuluj'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Usuń'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final entryProvider = Provider.of<EntryProvider>(context, listen: false);
+      final success = await entryProvider.deleteEntry(entry.id);
+
+      if (!context.mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Wpis został usunięty.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pop(); // Powrót do listy wpisów
+      } else if (entryProvider.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(entryProvider.errorMessage!),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +70,13 @@ class EntryDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(entry.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Usuń wpis',
+            onPressed: () => _confirmDeleteEntry(context),
+          ),
+        ],
       ),
       body: Center(
         child: ConstrainedBox(
