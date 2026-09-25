@@ -6,10 +6,16 @@ import 'package:image_picker/image_picker.dart'; // Obsługa XFile
 
 import '../models/entry.dart';
 import '../services/secure_storage_service.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart' hide Category;
 
 class EntryProvider with ChangeNotifier {
   final SecureStorageService _storageService = SecureStorageService();
-  final String _baseUrl = 'http://localhost:3000';
+  String get _baseUrl {
+    if (kIsWeb) return 'http://localhost:3000';
+    if (Platform.isAndroid) return 'http://10.0.2.2:3000';
+    return 'http://localhost:3000';
+  }
 
   List<Entry> _entries = [];
   bool _isLoading = false;

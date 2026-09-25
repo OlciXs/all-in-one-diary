@@ -43,11 +43,9 @@ class _CategoryEntriesScreenState extends State<CategoryEntriesScreen> {
   }
 
   Future<void> _confirmDeleteCategory() async {
-    // 1. Pobieramy providery SYNCHRONICZNIE przed await
     final catProvider = Provider.of<CategoryProvider>(context, listen: false);
     final entryProvider = Provider.of<EntryProvider>(context, listen: false);
 
-    // 2. Wywołujemy okno dialogowe (operacja asynchroniczna)
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -71,12 +69,10 @@ class _CategoryEntriesScreenState extends State<CategoryEntriesScreen> {
 
     if (confirmed != true) return;
 
-    // 3. Po pierwszym await sprawdzamy 'mounted' (właściwość State)
     if (!mounted) return;
 
     final success = await catProvider.deleteCategory(widget.categoryId);
 
-    // 4. Po drugim await ponownie sprawdzamy 'mounted'
     if (!mounted) return;
 
     if (success) {
@@ -127,7 +123,10 @@ class _CategoryEntriesScreenState extends State<CategoryEntriesScreen> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 600),
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 20.0,
+                  ),
                   itemCount: categoryEntries.length,
                   itemBuilder: (context, index) {
                     final entry = categoryEntries[index];
@@ -145,54 +144,10 @@ class _CategoryEntriesScreenState extends State<CategoryEntriesScreen> {
                         : null;
 
                     return Card(
-                      clipBehavior: Clip.antiAlias,
+                      clipBehavior: Clip.none,
                       margin: const EdgeInsets.only(bottom: 12.0),
-                      child: ListTile(
-                        leading: fullThumbUrl != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.network(
-                                  fullThumbUrl,
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      width: 50,
-                                      height: 50,
-                                      color: Colors.grey[200],
-                                      child: Icon(
-                                        Icons.broken_image_outlined,
-                                        size: 24,
-                                        color: Colors.grey[500],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              )
-                            : null,
-                        title: Text(
-                          entry.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (entry.content != null &&
-                                entry.content!.isNotEmpty)
-                              Text(
-                                entry.content!,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            const SizedBox(height: 4),
-                            Text(
-                              dateStr,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                        trailing: const Icon(Icons.chevron_right),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12.0),
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -200,6 +155,78 @@ class _CategoryEntriesScreenState extends State<CategoryEntriesScreen> {
                             ),
                           );
                         },
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            children: [
+                              if (fullThumbUrl != null) ...[
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.network(
+                                    fullThumbUrl,
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 50,
+                                        height: 50,
+                                        color: Colors.grey[200],
+                                        child: Icon(
+                                          Icons.broken_image_outlined,
+                                          size: 24,
+                                          color: Colors.grey[500],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                              ],
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      entry.title,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            height: 1.3,
+                                          ),
+                                    ),
+                                    if (entry.content != null &&
+                                        entry.content!.isNotEmpty) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        entry.content!,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(height: 1.2),
+                                      ),
+                                    ],
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      dateStr,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(color: Colors.grey[600]),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.chevron_right),
+                            ],
+                          ),
+                        ),
                       ),
                     );
                   },

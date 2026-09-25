@@ -6,9 +6,16 @@ import 'package:http/http.dart' as http;
 import '../models/category.dart';
 import '../services/secure_storage_service.dart';
 
+import 'dart:io';
+import 'package:flutter/foundation.dart' hide Category;
+
 class CategoryProvider with ChangeNotifier {
   final SecureStorageService _storageService = SecureStorageService();
-  final String _baseUrl = 'http://localhost:3000';
+  String get _baseUrl {
+    if (kIsWeb) return 'http://localhost:3000';
+    if (Platform.isAndroid) return 'http://10.0.2.2:3000';
+    return 'http://localhost:3000';
+  }
 
   List<Category> _categories = [];
   bool _isLoading = false;

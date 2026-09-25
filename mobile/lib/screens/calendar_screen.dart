@@ -246,6 +246,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     bool isToday = false,
   }) {
     final dayEntries = _getEntriesForDay(day, allEntries);
+    final colorScheme = Theme.of(context).colorScheme;
 
     Entry? entryWithPhoto;
     if (_selectedCategoryId != null && dayEntries.isNotEmpty) {
@@ -268,13 +269,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.0),
         border: isSelected
-            ? Border.all(color: Theme.of(context).primaryColor, width: 2.5)
+            ? Border.all(color: colorScheme.primary, width: 2.5) // Wyraźna ramka zaznaczenia
             : isToday
-            ? Border.all(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
-                width: 1.5,
-              )
-            : null,
+                ? Border.all(
+                    color: colorScheme.secondary, // Inny kolor dla dzisiejszego dnia
+                    width: 2.0,
+                  )
+                : null,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6.0),
@@ -317,7 +318,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ] else ...[
               Container(
                 color: isSelected
-                    ? Theme.of(context).primaryColor.withValues(alpha: 0.2)
+                    ? colorScheme.primary.withValues(alpha: 0.3)
                     : Colors.transparent,
                 child: Column(
                   children: [

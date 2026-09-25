@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,7 +11,12 @@ class EntryDetailScreen extends StatelessWidget {
 
   const EntryDetailScreen({super.key, required this.entry});
 
-  static const String _baseUrl = 'http://localhost:3000';
+  // Dynamiczny pobór adresu URL w zależności od platformy
+  String get _baseUrl {
+    if (kIsWeb) return 'http://localhost:3000';
+    if (Platform.isAndroid) return 'http://10.0.2.2:3000';
+    return 'http://localhost:3000';
+  }
 
   Future<void> _confirmDeleteEntry(BuildContext context) async {
     final confirmed = await showDialog<bool>(
@@ -99,8 +106,8 @@ class EntryDetailScreen extends StatelessWidget {
 
     final endDateStr = entry.endDate != null
         ? (entry.isAllDay
-              ? entry.endDate!.toString().split(' ')[0]
-              : entry.endDate!.toString().substring(0, 16))
+            ? entry.endDate!.toString().split(' ')[0]
+            : entry.endDate!.toString().substring(0, 16))
         : null;
 
     final String? fullPhotoUrl =
@@ -200,7 +207,7 @@ class EntryDetailScreen extends StatelessWidget {
                           margin: const EdgeInsets.all(8.0),
                           padding: const EdgeInsets.all(6.0),
                           decoration: BoxDecoration(
-                            color: Colors.black.withAlpha(150),
+                            color: Colors.black.withValues(alpha: 0.6),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           child: const Icon(
