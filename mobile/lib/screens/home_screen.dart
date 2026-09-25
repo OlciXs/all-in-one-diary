@@ -7,6 +7,7 @@ import 'login_screen.dart';
 import 'add_category_screen.dart';
 import 'add_entry_screen.dart';
 import 'categories_screen.dart';
+import 'calendar_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -102,7 +103,12 @@ class HomeScreen extends StatelessWidget {
                             const SizedBox(height: 12),
                             OutlinedButton.icon(
                               onPressed: () {
-                                // TODO: Podpięcie widoku Kalendarza
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => 
+                                        const CalendarScreen(),
+                                  ),
+                                );
                               },
                               icon: const Icon(Icons.calendar_month_outlined),
                               label: const Text('Kalendarz'),

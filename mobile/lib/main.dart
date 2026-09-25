@@ -40,6 +40,14 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
+            builder: (context, child) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: const TextScaler.linear(0.85),
+                ),
+                child: child!,
+              );
+            },
             home: initialToken != null
                 ? const HomeScreen()
                 : const LoginScreen(),
