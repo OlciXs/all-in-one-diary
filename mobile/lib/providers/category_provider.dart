@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
 import '../models/category.dart';
 import '../services/secure_storage_service.dart';
 
@@ -95,9 +97,9 @@ class CategoryProvider with ChangeNotifier {
 
     try {
       final token = await _storageService.getToken();
-      
+
       final String hexColor =
-          '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+          '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
 
       final response = await http.post(
         Uri.parse('$_baseUrl/categories'),

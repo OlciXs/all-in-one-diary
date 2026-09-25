@@ -1,8 +1,9 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart'; // Obsługa kIsWeb
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart'; // Obsługa XFile
+
 import '../models/entry.dart';
 import '../services/secure_storage_service.dart';
 
@@ -79,21 +80,20 @@ class EntryProvider with ChangeNotifier {
     try {
       final token = await _storageService.getToken();
 
-
       final request = http.MultipartRequest(
         'POST',
         Uri.parse('$_baseUrl/entries'),
       );
 
-      request.headers.addAll({
-        'Authorization': 'Bearer $token',
-      });
+      request.headers.addAll({'Authorization': 'Bearer $token'});
 
       // Dodajemy pola tekstowe
       request.fields['title'] = title;
       if (content != null) request.fields['content'] = content;
       request.fields['startDate'] = startDate.toIso8601String();
-      if (endDate != null) request.fields['endDate'] = endDate.toIso8601String();
+      if (endDate != null) {
+        request.fields['endDate'] = endDate.toIso8601String();
+      }
       request.fields['isAllDay'] = isAllDay.toString();
       request.fields['categoryId'] = categoryId.toString();
 
@@ -111,10 +111,7 @@ class EntryProvider with ChangeNotifier {
           );
         } else {
           request.files.add(
-            await http.MultipartFile.fromPath(
-              'photo',
-              photoFile.path,
-            ),
+            await http.MultipartFile.fromPath('photo', photoFile.path),
           );
         }
       }

@@ -9,8 +9,8 @@ class Entry {
   final bool isAllDay;
   final int categoryId;
   final Category? category;
-  final String? photoUrl;    
-  final String? thumbnailUrl; 
+  final String? photoUrl;
+  final String? thumbnailUrl;
 
   Entry({
     required this.id,
@@ -31,18 +31,18 @@ class Entry {
       title: json['title'] as String,
       content: json['content'] as String?,
       startDate: json['startDate'] != null
-          ? DateTime.parse(json['startDate']).toLocal() 
+          ? DateTime.parse(json['startDate']).toLocal()
           : DateTime.now(),
       endDate: json['endDate'] != null
-          ? DateTime.parse(json['endDate']).toLocal() 
+          ? DateTime.parse(json['endDate']).toLocal()
           : null,
       isAllDay: json['isAllDay'] as bool? ?? true,
       categoryId: json['categoryId'] as int,
       category: json['category'] != null
           ? Category.fromJson(json['category'])
           : null,
-      photoUrl: json['photoUrl'] as String?,      
-      thumbnailUrl: json['thumbnailUrl'] as String?, 
+      photoUrl: json['photoUrl'] as String?,
+      thumbnailUrl: json['thumbnailUrl'] as String?,
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/auth_provider.dart';
 import 'home_screen.dart';
 import '../providers/theme_provider.dart';
@@ -30,9 +31,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.register(
-      login: _loginController.text.trim(),   // np. "jan_kowalski"
-      email: _emailController.text.trim(),   // np. "jan@example.com"
-      password: _passwordController.text,    // min. 6 znaków
+      login: _loginController.text.trim(), // np. "jan_kowalski"
+      email: _emailController.text.trim(), // np. "jan@example.com"
+      password: _passwordController.text, // min. 6 znaków
     );
 
     if (success && mounted) {
@@ -95,8 +96,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       labelText: 'Email',
                       prefixIcon: Icon(Icons.email_outlined),
                     ),
-                    validator: (val) =>
-                        val == null || !val.contains('@') ? 'Podaj poprawny email' : null,
+                    validator: (val) => val == null || !val.contains('@')
+                        ? 'Podaj poprawny email'
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -105,8 +107,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       labelText: 'Login',
                       prefixIcon: Icon(Icons.person_outline),
                     ),
-                    validator: (val) =>
-                        val == null || val.length < 3 ? 'Login musi mieć min. 3 znaki' : null,
+                    validator: (val) => val == null || val.length < 3
+                        ? 'Login musi mieć min. 3 znaki'
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -116,8 +119,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       labelText: 'Hasło',
                       prefixIcon: Icon(Icons.lock_outlined),
                     ),
-                    validator: (val) =>
-                        val == null || val.length < 6 ? 'Hasło musi mieć min. 6 znaków' : null,
+                    validator: (val) => val == null || val.length < 6
+                        ? 'Hasło musi mieć min. 6 znaków'
+                        : null,
                   ),
                   const SizedBox(height: 24),
                   auth.isLoading
@@ -126,7 +130,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           onPressed: _submit,
                           child: const Text(
                             'Zarejestruj się',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                 ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/entry.dart';
 import '../providers/entry_provider.dart';
 
@@ -57,7 +58,6 @@ class EntryDetailScreen extends StatelessWidget {
     }
   }
 
-
   void _openFullScreenImage(BuildContext context, String imageUrl) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -99,14 +99,15 @@ class EntryDetailScreen extends StatelessWidget {
 
     final endDateStr = entry.endDate != null
         ? (entry.isAllDay
-            ? entry.endDate!.toString().split(' ')[0]
-            : entry.endDate!.toString().substring(0, 16))
+              ? entry.endDate!.toString().split(' ')[0]
+              : entry.endDate!.toString().substring(0, 16))
         : null;
 
-    final String? fullPhotoUrl = entry.photoUrl != null && entry.photoUrl!.isNotEmpty
+    final String? fullPhotoUrl =
+        entry.photoUrl != null && entry.photoUrl!.isNotEmpty
         ? (entry.photoUrl!.startsWith('http')
-            ? entry.photoUrl
-            : '$_baseUrl/${entry.photoUrl!.replaceAll('\\', '/')}')
+              ? entry.photoUrl
+              : '$_baseUrl/${entry.photoUrl!.replaceAll('\\', '/')}')
         : null;
 
     return Scaffold(
@@ -130,9 +131,8 @@ class EntryDetailScreen extends StatelessWidget {
               children: [
                 Text(
                   entry.title,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(context).textTheme.headlineMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8.0),
                 Row(
@@ -149,9 +149,8 @@ class EntryDetailScreen extends StatelessWidget {
                             ? '$startDateStr  —  $endDateStr'
                             : startDateStr,
                         softWrap: true,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[700],
-                            ),
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(color: Colors.grey[700]),
                       ),
                     ),
                   ],
@@ -180,8 +179,11 @@ class EntryDetailScreen extends StatelessWidget {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.broken_image_outlined,
-                                        size: 40, color: Colors.grey[500]),
+                                    Icon(
+                                      Icons.broken_image_outlined,
+                                      size: 40,
+                                      color: Colors.grey[500],
+                                    ),
                                     const SizedBox(height: 8),
                                     Text(
                                       'Nie udało się wczytać zdjęcia',
@@ -224,9 +226,9 @@ class EntryDetailScreen extends StatelessWidget {
                   Text(
                     'Brak dodatkowego opisu.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontStyle: FontStyle.italic,
-                          color: Colors.grey,
-                        ),
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey,
+                    ),
                   ),
               ],
             ),

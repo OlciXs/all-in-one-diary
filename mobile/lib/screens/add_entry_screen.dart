@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:flutter/material.dart' hide Category;
+
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+
 import '../models/category.dart';
 import '../providers/category_provider.dart';
 import '../providers/entry_provider.dart';
@@ -35,6 +36,7 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
   void initState() {
     super.initState();
     Future.microtask(() async {
+      if (!mounted) return;
       final catProvider = Provider.of<CategoryProvider>(context, listen: false);
       if (catProvider.categories.isEmpty) {
         await catProvider.fetchCategories();
@@ -43,7 +45,8 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
       if (catProvider.categories.isNotEmpty && mounted) {
         setState(() {
           final targetId = widget.initialCategoryId;
-          if (targetId != null && catProvider.categories.any((c) => c.id == targetId)) {
+          if (targetId != null &&
+              catProvider.categories.any((c) => c.id == targetId)) {
             _selectedCategoryId = targetId;
           } else {
             _selectedCategoryId = catProvider.categories.first.id;
@@ -145,7 +148,10 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategoryId == null) return;
 
-    final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
+    final categoryProvider = Provider.of<CategoryProvider>(
+      context,
+      listen: false,
+    );
     final entryProvider = Provider.of<EntryProvider>(context, listen: false);
 
     final selectedCategory = categoryProvider.categories.firstWhere(
@@ -158,7 +164,9 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
 
     final success = await entryProvider.addEntry(
       title: _titleController.text.trim(),
-      content: selectedCategory.hasContent && _contentController.text.trim().isNotEmpty
+      content:
+          selectedCategory.hasContent &&
+              _contentController.text.trim().isNotEmpty
           ? _contentController.text.trim()
           : null,
       startDate: startDateUtc,
@@ -197,17 +205,19 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
     Category? currentCategory;
     if (categoryProvider.categories.isNotEmpty) {
       if (_selectedCategoryId != null) {
-        final matches = categoryProvider.categories.where((c) => c.id == _selectedCategoryId);
-        currentCategory = matches.isNotEmpty ? matches.first : categoryProvider.categories.first;
+        final matches = categoryProvider.categories.where(
+          (c) => c.id == _selectedCategoryId,
+        );
+        currentCategory = matches.isNotEmpty
+            ? matches.first
+            : categoryProvider.categories.first;
       } else {
         currentCategory = categoryProvider.categories.first;
       }
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nowy Wpis'),
-      ),
+      appBar: AppBar(title: const Text('Nowy Wpis')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -219,7 +229,7 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   DropdownButtonFormField<int>(
-                    value: currentCategory?.id,
+                    initialValue: currentCategory?.id,
                     decoration: const InputDecoration(
                       labelText: 'Wybierz kategorię',
                       prefixIcon: Icon(Icons.category_outlined),
@@ -247,7 +257,8 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
                         _webImageBytes = null;
                       });
                     },
-                    validator: (val) => val == null ? 'Wybierz kategorię' : null,
+                    validator: (val) =>
+                        val == null ? 'Wybierz kategorię' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -284,27 +295,32 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
                       ),
                     ListTile(
                       leading: const Icon(Icons.calendar_today_outlined),
-                      title: Text(_isAllDay
-                          ? 'Data: ${_startDate.toString().split(' ')[0]}'
-                          : 'Początek: ${_startDate.toString().substring(0, 16)}'),
+                      title: Text(
+                        _isAllDay
+                            ? 'Data: ${_startDate.toString().split(' ')[0]}'
+                            : 'Początek: ${_startDate.toString().substring(0, 16)}',
+                      ),
                       trailing: const Icon(Icons.arrow_drop_down),
                       onTap: _selectStartDate,
                     ),
                     if (currentCategory?.allowTimeRange ?? false)
                       ListTile(
                         leading: const Icon(Icons.event_available_outlined),
-                        title: Text(_endDate == null
-                            ? 'Koniec: Brak'
-                            : _isAllDay
-                                ? 'Koniec: ${_endDate!.toString().split(' ')[0]}'
-                                : 'Koniec: ${_endDate!.toString().substring(0, 16)}'),
+                        title: Text(
+                          _endDate == null
+                              ? 'Koniec: Brak'
+                              : _isAllDay
+                              ? 'Koniec: ${_endDate!.toString().split(' ')[0]}'
+                              : 'Koniec: ${_endDate!.toString().substring(0, 16)}',
+                        ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (_endDate != null)
                               IconButton(
                                 icon: const Icon(Icons.clear),
-                                onPressed: () => setState(() => _endDate = null),
+                                onPressed: () =>
+                                    setState(() => _endDate = null),
                               ),
                             const Icon(Icons.arrow_drop_down),
                           ],
@@ -336,7 +352,10 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
                                   ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.remove_circle, color: Colors.red),
+                            icon: const Icon(
+                              Icons.remove_circle,
+                              color: Colors.red,
+                            ),
                             onPressed: () {
                               setState(() {
                                 _pickedFile = null;

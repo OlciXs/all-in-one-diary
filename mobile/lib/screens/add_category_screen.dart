@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/category_provider.dart';
 
 class AddCategoryScreen extends StatefulWidget {
@@ -43,7 +44,10 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
+    final categoryProvider = Provider.of<CategoryProvider>(
+      context,
+      listen: false,
+    );
 
     // Przekazujemy wszystkie nowe pola do metody w providerze
     final success = await categoryProvider.addCategory(
@@ -66,8 +70,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
         ),
       );
       Navigator.of(context).popUntil((route) => route.isFirst);
-    }
-    else if (categoryProvider.errorMessage != null) {
+    } else if (categoryProvider.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(categoryProvider.errorMessage!),
@@ -82,9 +85,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     final categoryProvider = Provider.of<CategoryProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nowa Kategoria'),
-      ),
+      appBar: AppBar(title: const Text('Nowa Kategoria')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -143,7 +144,10 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                                 : null,
                           ),
                           child: isSelected
-                              ? const Icon(Icons.check, color: Colors.white) //tenteg
+                              ? const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                ) //tenteg
                               : null,
                         ),
                       );
@@ -177,11 +181,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                     SwitchListTile(
                       title: const Text('Domyślnie ustawiaj dzisiejszą datę'),
                       value: _defaultToCurrentDate,
-                      onChanged: (val) => setState(() => _defaultToCurrentDate = val),
+                      onChanged: (val) =>
+                          setState(() => _defaultToCurrentDate = val),
                     ),
                     SwitchListTile(
                       title: const Text('Przedział czasowy (godziny OD - DO)'),
-                      subtitle: const Text('Włącz dla wydarzeń, wyłącz dla pojedynczych dat'),
+                      subtitle: const Text(
+                        'Włącz dla wydarzeń, wyłącz dla pojedynczych dat',
+                      ),
                       value: _allowTimeRange,
                       onChanged: (val) => setState(() => _allowTimeRange = val),
                     ),
@@ -201,7 +208,10 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             icon: const Icon(Icons.save_outlined),
                             label: const Text(
                               'Zapisz kategorię',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                   ),

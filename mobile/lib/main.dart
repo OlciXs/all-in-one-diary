@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'providers/auth_provider.dart';
 import 'services/secure_storage_service.dart';
 import 'screens/login_screen.dart';
@@ -11,7 +12,7 @@ import 'providers/entry_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   final storage = SecureStorageService();
   final initialToken = await storage.getToken();
 
@@ -39,7 +40,9 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
-            home: initialToken != null ? const HomeScreen() : const LoginScreen(),
+            home: initialToken != null
+                ? const HomeScreen()
+                : const LoginScreen(),
           );
         },
       ),

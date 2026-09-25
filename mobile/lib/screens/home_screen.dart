@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 import 'login_screen.dart';
@@ -38,7 +39,7 @@ class HomeScreen extends StatelessWidget {
             ),
             tooltip: 'Zmień motyw',
             onPressed: () {
-              themeProvider.toggleTheme(); 
+              themeProvider.toggleTheme();
             },
           ),
           IconButton(
@@ -90,7 +91,8 @@ class HomeScreen extends StatelessWidget {
                               onPressed: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => const CategoriesScreen(),
+                                    builder: (context) =>
+                                        const CategoriesScreen(),
                                   ),
                                 );
                               },
@@ -175,7 +177,8 @@ class HomeScreen extends StatelessWidget {
                                 // TERAZ BEZPOŚREDNIO OTWIERAMY EKRAN DODAWANIA WPISU!
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => const AddEntryScreen(),
+                                    builder: (context) =>
+                                        const AddEntryScreen(),
                                   ),
                                 );
                               },
@@ -187,11 +190,14 @@ class HomeScreen extends StatelessWidget {
                               onPressed: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => const AddCategoryScreen(),
+                                    builder: (context) =>
+                                        const AddCategoryScreen(),
                                   ),
                                 );
                               },
-                              icon: const Icon(Icons.create_new_folder_outlined),
+                              icon: const Icon(
+                                Icons.create_new_folder_outlined,
+                              ),
                               label: const Text('Kategorie'),
                             ),
                           ],

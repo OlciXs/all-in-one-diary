@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+
 import '../core/api_config.dart';
 import '../services/secure_storage_service.dart';
 
@@ -8,7 +10,7 @@ class AuthProvider with ChangeNotifier {
   final SecureStorageService _storage = SecureStorageService();
 
   bool get isAuthenticated => _token != null;
-  
+
   bool _isLoading = false;
   String? _errorMessage;
   String? _token;
@@ -22,13 +24,13 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-// --- AUTOMATYCZNE LOGOWANIE ---
+  // --- AUTOMATYCZNE LOGOWANIE ---
   Future<bool> tryAutoLogin() async {
     final savedToken = await _storage.getToken();
     if (savedToken == null) {
       return false;
     }
-    
+
     _token = savedToken;
     notifyListeners();
     return true;
@@ -43,10 +45,7 @@ class AuthProvider with ChangeNotifier {
       final response = await http.post(
         Uri.parse('${ApiConfig.baseUrl}/auth/login'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email.trim(),
-          'password': password,
-        }),
+        body: jsonEncode({'email': email.trim(), 'password': password}),
       );
 
       final responseData = jsonDecode(response.body);
@@ -64,7 +63,7 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
     } catch (e) {
-      print('BŁĄD LOGOWANIA: $e');
+      debugPrint('BŁĄD LOGOWANIA: $e');
       _errorMessage = 'Brak połączenia z serwerem';
       _setLoading(false);
       return false;
@@ -102,14 +101,14 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
     } catch (e) {
-      print('BŁĄD REJESTRACJI: $e');
+      debugPrint('BŁĄD REJESTRACJI: $e');
       _errorMessage = 'Brak połączenia z serwerem';
       _setLoading(false);
       return false;
     }
   }
 
- // --- WYLOGOWANIE ---
+  // --- WYLOGOWANIE ---
   Future<void> logout() async {
     _token = null;
     await _storage.deleteToken();

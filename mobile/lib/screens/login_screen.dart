@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/auth_provider.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
@@ -121,7 +122,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: _submit,
                           child: const Text(
                             'Zaloguj się',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                   const SizedBox(height: 16),
@@ -129,11 +133,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (_) => const RegisterScreen()),
+                          builder: (_) => const RegisterScreen(),
+                        ),
                       );
                     },
                     style: TextButton.styleFrom(
-                      foregroundColor: theme.colorScheme.secondary, // Kolor z motywu
+                      foregroundColor:
+                          theme.colorScheme.secondary, // Kolor z motywu
                     ),
                     child: const Text('Nie masz konta? Zarejestruj się!'),
                   ),

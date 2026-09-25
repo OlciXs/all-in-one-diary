@@ -37,7 +37,8 @@ class Category {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'color': '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}',
+      'color':
+          '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}',
       'hasContent': hasContent,
       'hasPhotos': hasPhotos,
       'hasDate': hasDate,
