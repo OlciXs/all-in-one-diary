@@ -30,10 +30,9 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          // Przełącznik motywu
           IconButton(
             icon: Icon(
-            themeProvider.isDarkMode(context)
+              themeProvider.isDarkMode(context)
                   ? Icons.light_mode_outlined
                   : Icons.dark_mode_outlined,
             ),
@@ -42,7 +41,6 @@ class HomeScreen extends StatelessWidget {
               themeProvider.toggleTheme(); 
             },
           ),
-          // Przyciski wylogowania
           IconButton(
             icon: const Icon(Icons.logout_outlined),
             tooltip: 'Wyloguj się',
@@ -53,11 +51,10 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // GÓRNA CZĘŚĆ
+            // GÓRNA CZĘŚĆ - Przeglądanie
             Expanded(
               child: Stack(
                 children: [
-                  // Tło / Znak wodny
                   Positioned(
                     right: 16,
                     top: 16,
@@ -70,8 +67,6 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Content
-                  // Górna część - Przeglądanie wpisów napis
                   Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Center(
@@ -93,11 +88,11 @@ class HomeScreen extends StatelessWidget {
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                               onPressed: () {
-                              Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => const CategoriesScreen(),
-                                    ),
-                                  );
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const CategoriesScreen(),
+                                  ),
+                                );
                               },
                               icon: const Icon(Icons.category_outlined),
                               label: const Text('Kategorie'),
@@ -140,24 +135,22 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // DOLNA CZĘŚĆ - Tworzenie / Pisanie (Znak wodny: Ołówek/Pisanie)
+            // DOLNA CZĘŚĆ - Tworzenie
             Expanded(
               child: Stack(
                 children: [
-                  // Tło / Znak wodny
                   Positioned(
                     right: 16,
                     top: 16,
                     child: Opacity(
-                      opacity: 0.08, // Subtelny akcent znaku wodnego
+                      opacity: 0.08,
                       child: Icon(
-                        Icons.edit_note_outlined, // Lub ikona/emotikona pisania ✍️
+                        Icons.edit_note_outlined,
                         size: 140,
                         color: theme.colorScheme.secondary,
                       ),
                     ),
                   ),
-                  // Content
                   Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Center(
@@ -179,11 +172,12 @@ class HomeScreen extends StatelessWidget {
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                               onPressed: () {
+                                // TERAZ BEZPOŚREDNIO OTWIERAMY EKRAN DODAWANIA WPISU!
                                 Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const AddEntryScreen(),
-                                ),
-                              );
+                                  MaterialPageRoute(
+                                    builder: (context) => const AddEntryScreen(),
+                                  ),
+                                );
                               },
                               icon: const Icon(Icons.note_add_outlined),
                               label: const Text('Wpisy'),

@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { IsNotEmpty, IsString, IsInt, IsDate, IsBoolean, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -32,7 +32,22 @@ export class CreateEntryDto {
   endDate?: Date;
 
   @ApiProperty({ example: true, required: false })
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return value;
+  })
   @IsBoolean()
   @IsOptional()
   isAllDay?: boolean;
+
+  @ApiProperty({ example: 'uploads/photos/image.jpg', required: false })
+  @IsString()
+  @IsOptional()
+  photoUrl?: string;
+
+  @ApiProperty({ example: 'uploads/thumbnails/thumb_image.jpg', required: false })
+  @IsString()
+  @IsOptional()
+  thumbnailUrl?: string;
 }

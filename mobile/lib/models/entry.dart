@@ -9,6 +9,8 @@ class Entry {
   final bool isAllDay;
   final int categoryId;
   final Category? category;
+  final String? photoUrl;    
+  final String? thumbnailUrl; 
 
   Entry({
     required this.id,
@@ -19,9 +21,11 @@ class Entry {
     this.isAllDay = true,
     required this.categoryId,
     this.category,
+    this.photoUrl,
+    this.thumbnailUrl,
   });
 
-factory Entry.fromJson(Map<String, dynamic> json) {
+  factory Entry.fromJson(Map<String, dynamic> json) {
     return Entry(
       id: json['id'] as int,
       title: json['title'] as String,
@@ -37,6 +41,8 @@ factory Entry.fromJson(Map<String, dynamic> json) {
       category: json['category'] != null
           ? Category.fromJson(json['category'])
           : null,
+      photoUrl: json['photoUrl'] as String?,      
+      thumbnailUrl: json['thumbnailUrl'] as String?, 
     );
   }
 

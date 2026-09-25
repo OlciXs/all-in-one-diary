@@ -1,4 +1,8 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/material.dart' hide Category;
+import 'package:flutter/foundation.dart' hide Category;
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../models/category.dart';
 import '../providers/category_provider.dart';
@@ -18,10 +22,14 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
 
-  Category? _selectedCategory;
+  int? _selectedCategoryId;
   DateTime _startDate = DateTime.now();
   DateTime? _endDate;
   bool _isAllDay = true;
+
+  XFile? _pickedFile;
+  Uint8List? _webImageBytes;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -31,16 +39,14 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
       if (catProvider.categories.isEmpty) {
         await catProvider.fetchCategories();
       }
-      
+
       if (catProvider.categories.isNotEmpty && mounted) {
         setState(() {
-          if (widget.initialCategoryId != null) {
-            _selectedCategory = catProvider.categories.firstWhere(
-              (c) => c.id == widget.initialCategoryId,
-              orElse: () => catProvider.categories.first,
-            );
+          final targetId = widget.initialCategoryId;
+          if (targetId != null && catProvider.categories.any((c) => c.id == targetId)) {
+            _selectedCategoryId = targetId;
           } else {
-            _selectedCategory = catProvider.categories.first;
+            _selectedCategoryId = catProvider.categories.first.id;
           }
         });
       }
@@ -52,6 +58,23 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
     _titleController.dispose();
     _contentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      if (kIsWeb) {
+        final bytes = await pickedFile.readAsBytes();
+        setState(() {
+          _pickedFile = pickedFile;
+          _webImageBytes = bytes;
+        });
+      } else {
+        setState(() {
+          _pickedFile = pickedFile;
+        });
+      }
+    }
   }
 
   Future<void> _selectStartDate() async {
@@ -118,55 +141,68 @@ class _AddEntryScreenState extends State<AddEntryScreen> {
     }
   }
 
-Future<void> _submit() async {
-  if (!_formKey.currentState!.validate()) return;
-  if (_selectedCategory == null) return;
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_selectedCategoryId == null) return;
 
-  final entryProvider = Provider.of<EntryProvider>(context, listen: false);
+    final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
+    final entryProvider = Provider.of<EntryProvider>(context, listen: false);
 
-  // Konwertujemy daty z czasu lokalnego na czas UTC przed wysyłką do API
-  final startDateUtc = _startDate.toUtc();
-  final endDateUtc = _endDate?.toUtc();
-
-  // Przekazujemy przeliczone daty (startDateUtc i endDateUtc) do metody
-  final success = await entryProvider.addEntry(
-    title: _titleController.text.trim(),
-    content: _selectedCategory!.hasContent && _contentController.text.trim().isNotEmpty
-        ? _contentController.text.trim()
-        : null,
-    startDate: startDateUtc, 
-    endDate: _selectedCategory!.allowTimeRange ? endDateUtc : null,
-    isAllDay: _isAllDay,
-    categoryId: _selectedCategory!.id,
-  );
-
-  if (!mounted) return;
-
-  if (success) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Wpis został pomyślnie dodany!'),
-        backgroundColor: Colors.green,
-      ),
+    final selectedCategory = categoryProvider.categories.firstWhere(
+      (c) => c.id == _selectedCategoryId,
+      orElse: () => categoryProvider.categories.first,
     );
-    
-    // Przekierowanie na ekran główny
-    Navigator.of(context).popUntil((route) => route.isFirst);
 
-  } else if (entryProvider.errorMessage != null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(entryProvider.errorMessage!),
-        backgroundColor: Colors.red,
-      ),
+    final startDateUtc = _startDate.toUtc();
+    final endDateUtc = _endDate?.toUtc();
+
+    final success = await entryProvider.addEntry(
+      title: _titleController.text.trim(),
+      content: selectedCategory.hasContent && _contentController.text.trim().isNotEmpty
+          ? _contentController.text.trim()
+          : null,
+      startDate: startDateUtc,
+      endDate: selectedCategory.allowTimeRange ? endDateUtc : null,
+      isAllDay: _isAllDay,
+      categoryId: selectedCategory.id,
+      photoFile: _pickedFile,
     );
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Wpis został pomyślnie dodany!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } else if (entryProvider.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(entryProvider.errorMessage!),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     final categoryProvider = Provider.of<CategoryProvider>(context);
     final entryProvider = Provider.of<EntryProvider>(context);
+
+    Category? currentCategory;
+    if (categoryProvider.categories.isNotEmpty) {
+      if (_selectedCategoryId != null) {
+        final matches = categoryProvider.categories.where((c) => c.id == _selectedCategoryId);
+        currentCategory = matches.isNotEmpty ? matches.first : categoryProvider.categories.first;
+      } else {
+        currentCategory = categoryProvider.categories.first;
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -182,17 +218,16 @@ Future<void> _submit() async {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Wybór kategorii
-                  DropdownButtonFormField<Category>(
-                    initialValue: _selectedCategory,
+                  DropdownButtonFormField<int>(
+                    value: currentCategory?.id,
                     decoration: const InputDecoration(
                       labelText: 'Wybierz kategorię',
                       prefixIcon: Icon(Icons.category_outlined),
                       border: OutlineInputBorder(),
                     ),
                     items: categoryProvider.categories.map((category) {
-                      return DropdownMenuItem<Category>(
-                        value: category,
+                      return DropdownMenuItem<int>(
+                        value: category.id,
                         child: Row(
                           children: [
                             CircleAvatar(
@@ -207,14 +242,14 @@ Future<void> _submit() async {
                     }).toList(),
                     onChanged: (val) {
                       setState(() {
-                        _selectedCategory = val;
+                        _selectedCategoryId = val;
+                        _pickedFile = null;
+                        _webImageBytes = null;
                       });
                     },
                     validator: (val) => val == null ? 'Wybierz kategorię' : null,
                   ),
                   const SizedBox(height: 16),
-
-                  // Tytuł
                   TextFormField(
                     controller: _titleController,
                     decoration: const InputDecoration(
@@ -227,9 +262,7 @@ Future<void> _submit() async {
                         : null,
                   ),
                   const SizedBox(height: 16),
-
-                  // Treść (wyświetlana tylko gdy linia hasContent w kategorii jest aktywna)
-                  if (_selectedCategory?.hasContent ?? true) ...[
+                  if (currentCategory?.hasContent ?? true) ...[
                     TextFormField(
                       controller: _contentController,
                       maxLines: 5,
@@ -241,11 +274,9 @@ Future<void> _submit() async {
                     ),
                     const SizedBox(height: 16),
                   ],
-
-                  // Sekcja Daty i Czasu
-                  if (_selectedCategory?.hasDate ?? true) ...[
+                  if (currentCategory?.hasDate ?? true) ...[
                     const Divider(),
-                    if (_selectedCategory?.allowTimeRange ?? false)
+                    if (currentCategory?.allowTimeRange ?? false)
                       SwitchListTile(
                         title: const Text('Wydarzenie całodniowe'),
                         value: _isAllDay,
@@ -259,7 +290,7 @@ Future<void> _submit() async {
                       trailing: const Icon(Icons.arrow_drop_down),
                       onTap: _selectStartDate,
                     ),
-                    if (_selectedCategory?.allowTimeRange ?? false)
+                    if (currentCategory?.allowTimeRange ?? false)
                       ListTile(
                         leading: const Icon(Icons.event_available_outlined),
                         title: Text(_endDate == null
@@ -283,8 +314,46 @@ Future<void> _submit() async {
                     const Divider(),
                     const SizedBox(height: 16),
                   ],
-
-                  // Przycisk Zapisu
+                  if (currentCategory?.hasPhotos ?? false) ...[
+                    if (_pickedFile != null)
+                      Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: kIsWeb
+                                ? Image.memory(
+                                    _webImageBytes!,
+                                    height: 180,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.file(
+                                    File(_pickedFile!.path),
+                                    height: 180,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                _pickedFile = null;
+                                _webImageBytes = null;
+                              });
+                            },
+                          ),
+                        ],
+                      )
+                    else
+                      OutlinedButton.icon(
+                        onPressed: _pickImage,
+                        icon: const Icon(Icons.add_a_photo_outlined),
+                        label: const Text('Dodaj zdjęcie do wpisu'),
+                      ),
+                    const SizedBox(height: 16),
+                  ],
                   entryProvider.isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : ElevatedButton.icon(

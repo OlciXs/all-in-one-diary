@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart'; // Obsługa kIsWeb
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart'; // Obsługa XFile
 import '../models/entry.dart';
 import '../services/secure_storage_service.dart';
 
@@ -68,6 +70,7 @@ class EntryProvider with ChangeNotifier {
     DateTime? endDate,
     bool isAllDay = true,
     required int categoryId,
+    XFile? photoFile,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -75,30 +78,58 @@ class EntryProvider with ChangeNotifier {
 
     try {
       final token = await _storageService.getToken();
-      final response = await http.post(
+
+
+      final request = http.MultipartRequest(
+        'POST',
         Uri.parse('$_baseUrl/entries'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'title': title,
-          'content': content,
-          'startDate': startDate.toIso8601String(),
-          'endDate': endDate?.toIso8601String(),
-          'isAllDay': isAllDay,
-          'categoryId': categoryId,
-        }),
       );
+
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+      });
+
+      // Dodajemy pola tekstowe
+      request.fields['title'] = title;
+      if (content != null) request.fields['content'] = content;
+      request.fields['startDate'] = startDate.toIso8601String();
+      if (endDate != null) request.fields['endDate'] = endDate.toIso8601String();
+      request.fields['isAllDay'] = isAllDay.toString();
+      request.fields['categoryId'] = categoryId.toString();
+
+      // Hybrydowa obsługa pliku
+      if (photoFile != null) {
+        if (kIsWeb) {
+          // Na Webie pobieramy bajty obrazu
+          final bytes = await photoFile.readAsBytes();
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'photo',
+              bytes,
+              filename: photoFile.name,
+            ),
+          );
+        } else {
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'photo',
+              photoFile.path,
+            ),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 201) {
         await fetchEntries();
         return true;
       } else {
-        _errorMessage = 'Błąd podczas zapisywania wpisu';
+        _errorMessage = 'Błąd podczas zapisywania wpisu: ${response.body}';
       }
     } catch (e) {
-      _errorMessage = 'Błąd połączenia z serwerem';
+      _errorMessage = 'Błąd połączenia z serwerem: $e';
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -8,6 +8,8 @@ class EntryDetailScreen extends StatelessWidget {
 
   const EntryDetailScreen({super.key, required this.entry});
 
+  static const String _baseUrl = 'http://localhost:3000';
+
   Future<void> _confirmDeleteEntry(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -43,7 +45,7 @@ class EntryDetailScreen extends StatelessWidget {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.of(context).pop(); // Powrót do listy wpisów
+        Navigator.of(context).pop();
       } else if (entryProvider.errorMessage != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -53,6 +55,40 @@ class EntryDetailScreen extends StatelessWidget {
         );
       }
     }
+  }
+
+
+  void _openFullScreenImage(BuildContext context, String imageUrl) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            iconTheme: const IconThemeData(color: Colors.white),
+            elevation: 0,
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              minScale: 0.8,
+              maxScale: 4.0,
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child: Text(
+                      'Nie udało się wczytać zdjęcia',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -67,6 +103,12 @@ class EntryDetailScreen extends StatelessWidget {
             : entry.endDate!.toString().substring(0, 16))
         : null;
 
+    final String? fullPhotoUrl = entry.photoUrl != null && entry.photoUrl!.isNotEmpty
+        ? (entry.photoUrl!.startsWith('http')
+            ? entry.photoUrl
+            : '$_baseUrl/${entry.photoUrl!.replaceAll('\\', '/')}')
+        : null;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(entry.title),
@@ -78,7 +120,7 @@ class EntryDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 600),
           child: Padding(
@@ -115,6 +157,62 @@ class EntryDetailScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16.0),
+
+                // Podgląd zdjęcia (kliknięcie otwiera pełny ekran)
+                if (fullPhotoUrl != null) ...[
+                  GestureDetector(
+                    onTap: () => _openFullScreenImage(context, fullPhotoUrl),
+                    child: Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12.0),
+                          child: Image.network(
+                            fullPhotoUrl,
+                            width: double.infinity,
+                            height: 260,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 150,
+                                width: double.infinity,
+                                color: Colors.grey[200],
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.broken_image_outlined,
+                                        size: 40, color: Colors.grey[500]),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Nie udało się wczytać zdjęcia',
+                                      style: TextStyle(color: Colors.grey[600]),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        // Mała ikonka informująca o możliwości powiększenia
+                        Container(
+                          margin: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(6.0),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withAlpha(150),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: const Icon(
+                            Icons.fullscreen,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                ],
+
                 const Divider(),
                 const SizedBox(height: 16.0),
                 if (entry.content != null && entry.content!.isNotEmpty)
