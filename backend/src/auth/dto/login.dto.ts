@@ -7,7 +7,6 @@ export class LoginDto {
   @IsNotEmpty()
   email!: string;
 
-
   @ApiProperty({ example: 'haslo123!', minLength: 6 })
   @IsString()
   @IsNotEmpty()

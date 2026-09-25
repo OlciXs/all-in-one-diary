@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -81,7 +82,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 DropdownMenuItem<int?>(
                   value: null,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0,
+                      vertical: 8.0,
+                    ),
                     child: const Text('Wszystko'),
                   ),
                 ),
@@ -89,7 +93,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   return DropdownMenuItem<int?>(
                     value: cat.id,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 8.0,
+                      ),
                       child: Text(cat.name),
                     ),
                   );
@@ -130,10 +137,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     _focusedDay = focusedDay;
                   },
                   eventLoader: (day) => _getEntriesForDay(day, allEntries),
-                  
+
                   calendarBuilders: CalendarBuilders(
                     // kropki
-                    markerBuilder: (context, date, events) => const SizedBox.shrink(),
+                    markerBuilder: (context, date, events) =>
+                        const SizedBox.shrink(),
 
                     // komórki
                     defaultBuilder: (context, day, focusedDay) {
@@ -142,12 +150,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                     // Zaznaczony dzień
                     selectedBuilder: (context, day, focusedDay) {
-                      return _buildCalendarCell(day, allEntries, categories, isSelected: true);
+                      return _buildCalendarCell(
+                        day,
+                        allEntries,
+                        categories,
+                        isSelected: true,
+                      );
                     },
 
                     // Dzisiejszy dzień
                     todayBuilder: (context, day, focusedDay) {
-                      return _buildCalendarCell(day, allEntries, categories, isToday: true);
+                      return _buildCalendarCell(
+                        day,
+                        allEntries,
+                        categories,
+                        isToday: true,
+                      );
                     },
 
                     // Dni z poprzedniego/następnego miesiąca
@@ -192,7 +210,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 ),
                                 title: Text(
                                   entry.title,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 subtitle: Text(
                                   'Kategoria: ${category.name}',
@@ -203,7 +223,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (_) => EntryDetailScreen(entry: entry),
+                                      builder: (_) =>
+                                          EntryDetailScreen(entry: entry),
                                     ),
                                   );
                                 },
@@ -232,8 +253,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
         final cat = categories.firstWhere((c) => c.id == _selectedCategoryId);
         if (cat.hasPhotos) {
           entryWithPhoto = dayEntries.firstWhere(
-            (e) => (e.thumbnailUrl != null && e.thumbnailUrl!.isNotEmpty) ||
-                   (e.photoUrl != null && e.photoUrl!.isNotEmpty),
+            (e) =>
+                (e.thumbnailUrl != null && e.thumbnailUrl!.isNotEmpty) ||
+                (e.photoUrl != null && e.photoUrl!.isNotEmpty),
           );
         }
       } catch (_) {
@@ -248,8 +270,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
         border: isSelected
             ? Border.all(color: Theme.of(context).primaryColor, width: 2.5)
             : isToday
-                ? Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5), width: 1.5)
-                : null,
+            ? Border.all(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
+                width: 1.5,
+              )
+            : null,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6.0),
@@ -269,9 +294,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 top: 0,
                 right: 0,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(6.0),
                     ),
@@ -289,7 +317,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ] else ...[
               Container(
                 color: isSelected
-                    ? Theme.of(context).primaryColor.withOpacity(0.2)
+                    ? Theme.of(context).primaryColor.withValues(alpha: 0.2)
                     : Colors.transparent,
                 child: Column(
                   children: [
@@ -298,7 +326,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       child: Text(
                         '${day.day}',
                         style: TextStyle(
-                          fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isSelected || isToday
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                     ),
@@ -313,7 +343,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           children: dayEntries.take(3).map((entry) {
                             Color dotColor = Colors.blue;
                             try {
-                              final cat = categories.firstWhere((c) => c.id == entry.categoryId);
+                              final cat = categories.firstWhere(
+                                (c) => c.id == entry.categoryId,
+                              );
                               dotColor = cat.color;
                             } catch (_) {}
 

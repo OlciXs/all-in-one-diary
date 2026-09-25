@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEntryDto } from './dto/create-entry.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
@@ -36,7 +40,7 @@ export class EntryService {
 
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
       const filename = `${uniqueSuffix}-${file.originalname}`;
-      
+
       const originalPath = path.join(photosDir, filename);
       const thumbFilename = `thumb-${filename}`;
       const thumbPath = path.join(thumbsDir, thumbFilename);
@@ -47,12 +51,13 @@ export class EntryService {
         .resize(200, 200, { fit: 'cover' })
         .toFile(thumbPath);
 
-
       photoUrl = `uploads/photos/${filename}`;
       thumbnailUrl = `uploads/thumbnails/${thumbFilename}`;
     }
 
-    let startDate = createEntryDto.startDate ? new Date(createEntryDto.startDate) : undefined;
+    let startDate = createEntryDto.startDate
+      ? new Date(createEntryDto.startDate)
+      : undefined;
     if (!startDate && category.defaultToCurrentDate) {
       startDate = new Date();
     }
@@ -62,8 +67,12 @@ export class EntryService {
         title: createEntryDto.title,
         content: createEntryDto.content,
         startDate: startDate ?? new Date(),
-        endDate: createEntryDto.endDate ? new Date(createEntryDto.endDate) : null,
-        isAllDay: String(createEntryDto.isAllDay) === 'true' || createEntryDto.isAllDay === true,
+        endDate: createEntryDto.endDate
+          ? new Date(createEntryDto.endDate)
+          : null,
+        isAllDay:
+          String(createEntryDto.isAllDay) === 'true' ||
+          createEntryDto.isAllDay === true,
         photoUrl,
         thumbnailUrl,
         userId,
@@ -110,7 +119,9 @@ export class EntryService {
       where: { id },
       data: {
         ...updateEntryDto,
-        categoryId: updateEntryDto.categoryId ? Number(updateEntryDto.categoryId) : undefined,
+        categoryId: updateEntryDto.categoryId
+          ? Number(updateEntryDto.categoryId)
+          : undefined,
       },
       include: { category: true },
     });

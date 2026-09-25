@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ParseIntPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+  ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { EntryService } from './entry.service';
 import { CreateEntryDto } from './dto/create-entry.dto';
@@ -40,7 +53,7 @@ export class EntryController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req,
   ) {
-    return this.entryService.create(createEntryDto, file, (req as any).user.userId);
+    return this.entryService.create(createEntryDto, file, req.user.userId);
   }
 
   @Get()
@@ -54,7 +67,11 @@ export class EntryController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateEntryDto: UpdateEntryDto, @Req() req) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateEntryDto: UpdateEntryDto,
+    @Req() req,
+  ) {
     return this.entryService.update(id, updateEntryDto, req.user.userId);
   }
 

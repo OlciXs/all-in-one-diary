@@ -28,13 +28,19 @@ export class CategoryService {
     });
 
     if (!category) {
-      throw new NotFoundException(`Kategoria o ID ${id} nie została znaleziona.`);
+      throw new NotFoundException(
+        `Kategoria o ID ${id} nie została znaleziona.`,
+      );
     }
 
     return category;
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto, userId: number) {
+  async update(
+    id: number,
+    updateCategoryDto: UpdateCategoryDto,
+    userId: number,
+  ) {
     // Sprawdzamy czy kategoria istnieje i należy do użytkownika
     await this.findOne(id, userId);
 
