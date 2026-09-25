@@ -1,27 +1,85 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEntryDto } from './dto/create-entry.dto';
 import { UpdateEntryDto } from './dto/update-entry.dto';
+import sharp from 'sharp';
+import * as path from 'path';
+import * as fs from 'fs/promises';
 
 @Injectable()
 export class EntryService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createEntryDto: CreateEntryDto, userId: number) {
-    //Sprawdzamy, czy kategoria istnieje I należy do tego użytkownika
+  async create(
+    createEntryDto: CreateEntryDto,
+    file: Express.Multer.File | undefined,
+    userId: number,
+  ) {
     const category = await this.prisma.category.findFirst({
-      where: { id: createEntryDto.categoryId, userId },
+      where: { id: Number(createEntryDto.categoryId), userId },
     });
 
     if (!category) {
       throw new BadRequestException('Wybrana kategoria nie istnieje');
     }
 
-    //Tworzymy wpis przypisany do usera
+    let photoUrl: string | undefined = undefined;
+    let thumbnailUrl: string | undefined = undefined;
+
+    if (file && file.buffer) {
+      const uploadDir = path.join(process.cwd(), 'uploads');
+      const photosDir = path.join(uploadDir, 'photos');
+      const thumbsDir = path.join(uploadDir, 'thumbnails');
+
+      await fs.mkdir(photosDir, { recursive: true });
+      await fs.mkdir(thumbsDir, { recursive: true });
+
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const filename = `${uniqueSuffix}-${file.originalname}`;
+
+      const originalPath = path.join(photosDir, filename);
+      const thumbFilename = `thumb-${filename}`;
+      const thumbPath = path.join(thumbsDir, thumbFilename);
+
+      await fs.writeFile(originalPath, file.buffer);
+
+      await sharp(file.buffer)
+        .resize(200, 200, { fit: 'cover' })
+        .toFile(thumbPath);
+
+      photoUrl = `uploads/photos/${filename}`;
+      thumbnailUrl = `uploads/thumbnails/${thumbFilename}`;
+    }
+
+    let startDate = createEntryDto.startDate
+      ? new Date(createEntryDto.startDate)
+      : undefined;
+    if (!startDate && category.defaultToCurrentDate) {
+      startDate = new Date();
+    }
+
     return this.prisma.entry.create({
       data: {
-        ...createEntryDto,
+        title: createEntryDto.title,
+        content: createEntryDto.content,
+        startDate: startDate ?? new Date(),
+        endDate: createEntryDto.endDate
+          ? new Date(createEntryDto.endDate)
+          : null,
+        isAllDay:
+          String(createEntryDto.isAllDay) === 'true' ||
+          createEntryDto.isAllDay === true,
+        photoUrl,
+        thumbnailUrl,
         userId,
+        categoryId: Number(createEntryDto.categoryId),
+      },
+      include: {
+        category: true,
       },
     });
   }
@@ -29,7 +87,8 @@ export class EntryService {
   async findAll(userId: number) {
     return this.prisma.entry.findMany({
       where: { userId },
-      include: { category: true }, // Dołączamy informacje o kategorii
+      include: { category: true },
+      orderBy: { startDate: 'desc' },
     });
   }
 
@@ -45,23 +104,26 @@ export class EntryService {
   }
 
   async update(id: number, updateEntryDto: UpdateEntryDto, userId: number) {
-    // Sprawdzamy, czy wpis w ogóle istnieje I czy należy do zalogowanego użytkownika
     await this.findOne(id, userId);
 
-    // Jeśli użytkownik chce zmienić kategorię wpisu, sprawdzamy czy nowa kategoria należy do niego
     if (updateEntryDto.categoryId) {
       const category = await this.prisma.category.findFirst({
-        where: { id: updateEntryDto.categoryId, userId },
+        where: { id: Number(updateEntryDto.categoryId), userId },
       });
       if (!category) {
         throw new BadRequestException('Wybrana kategoria nie istnieje');
       }
     }
 
-    //Wykonujemy bezpieczną aktualizację
     return this.prisma.entry.update({
       where: { id },
-      data: updateEntryDto,
+      data: {
+        ...updateEntryDto,
+        categoryId: updateEntryDto.categoryId
+          ? Number(updateEntryDto.categoryId)
+          : undefined,
+      },
+      include: { category: true },
     });
   }
 

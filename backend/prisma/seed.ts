@@ -3,12 +3,10 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // 1. Czyszczenie starych danych
   await prisma.entry.deleteMany();
   await prisma.category.deleteMany();
   await prisma.user.deleteMany();
 
-  // 2. Tworzenie użytkownika
   const user = await prisma.user.create({
     data: {
       login: 'ola',
@@ -17,15 +15,19 @@ async function main() {
     },
   });
 
-  // 3. Tworzenie kategorii
   const category = await prisma.category.create({
     data: {
-      name: 'Fits',
+      name: 'Rośliny',
+      color: '#4CAF50', // Zielony
+      hasContent: true,
+      hasPhotos: true,
+      hasDate: true,
+      defaultToCurrentDate: true,
+      allowTimeRange: false,
       userId: user.id,
     },
   });
 
-  // 4. Tworzenie wpisu w pamiętniku
   const entry = await prisma.entry.create({
     data: {
       title: 'First Entry',

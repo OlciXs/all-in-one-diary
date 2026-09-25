@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 import 'login_screen.dart';
 import 'add_category_screen.dart';
 import 'add_entry_screen.dart';
 import 'categories_screen.dart';
+import 'calendar_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -30,19 +32,17 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          // Przełącznik motywu
           IconButton(
             icon: Icon(
-            themeProvider.isDarkMode(context)
+              themeProvider.isDarkMode(context)
                   ? Icons.light_mode_outlined
                   : Icons.dark_mode_outlined,
             ),
             tooltip: 'Zmień motyw',
             onPressed: () {
-              themeProvider.toggleTheme(); 
+              themeProvider.toggleTheme();
             },
           ),
-          // Przyciski wylogowania
           IconButton(
             icon: const Icon(Icons.logout_outlined),
             tooltip: 'Wyloguj się',
@@ -53,11 +53,10 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // GÓRNA CZĘŚĆ
+            // GÓRNA CZĘŚĆ - Przeglądanie
             Expanded(
               child: Stack(
                 children: [
-                  // Tło / Znak wodny
                   Positioned(
                     right: 16,
                     top: 16,
@@ -70,8 +69,6 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Content
-                  // Górna część - Przeglądanie wpisów napis
                   Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Center(
@@ -93,11 +90,12 @@ class HomeScreen extends StatelessWidget {
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                               onPressed: () {
-                              Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => const CategoriesScreen(),
-                                    ),
-                                  );
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const CategoriesScreen(),
+                                  ),
+                                );
                               },
                               icon: const Icon(Icons.category_outlined),
                               label: const Text('Kategorie'),
@@ -105,7 +103,12 @@ class HomeScreen extends StatelessWidget {
                             const SizedBox(height: 12),
                             OutlinedButton.icon(
                               onPressed: () {
-                                // TODO: Podpięcie widoku Kalendarza
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const CalendarScreen(),
+                                  ),
+                                );
                               },
                               icon: const Icon(Icons.calendar_month_outlined),
                               label: const Text('Kalendarz'),
@@ -140,24 +143,22 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // DOLNA CZĘŚĆ - Tworzenie / Pisanie (Znak wodny: Ołówek/Pisanie)
+            // DOLNA CZĘŚĆ - Tworzenie
             Expanded(
               child: Stack(
                 children: [
-                  // Tło / Znak wodny
                   Positioned(
                     right: 16,
                     top: 16,
                     child: Opacity(
-                      opacity: 0.08, // Subtelny akcent znaku wodnego
+                      opacity: 0.08,
                       child: Icon(
-                        Icons.edit_note_outlined, // Lub ikona/emotikona pisania ✍️
+                        Icons.edit_note_outlined,
                         size: 140,
                         color: theme.colorScheme.secondary,
                       ),
                     ),
                   ),
-                  // Content
                   Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Center(
@@ -179,11 +180,13 @@ class HomeScreen extends StatelessWidget {
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
                               onPressed: () {
+                                // TERAZ BEZPOŚREDNIO OTWIERAMY EKRAN DODAWANIA WPISU!
                                 Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const AddEntryScreen(),
-                                ),
-                              );
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AddEntryScreen(),
+                                  ),
+                                );
                               },
                               icon: const Icon(Icons.note_add_outlined),
                               label: const Text('Wpisy'),
@@ -193,11 +196,14 @@ class HomeScreen extends StatelessWidget {
                               onPressed: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => const AddCategoryScreen(),
+                                    builder: (context) =>
+                                        const AddCategoryScreen(),
                                   ),
                                 );
                               },
-                              icon: const Icon(Icons.create_new_folder_outlined),
+                              icon: const Icon(
+                                Icons.create_new_folder_outlined,
+                              ),
                               label: const Text('Kategorie'),
                             ),
                           ],

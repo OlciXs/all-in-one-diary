@@ -1,25 +1,13 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+import '../models/category.dart';
 import '../services/secure_storage_service.dart';
-
-class Category {
-  final int id;
-  final String name;
-
-  Category({required this.id, required this.name});
-
-  factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(
-      id: json['id'],
-      name: json['name'],
-    );
-  }
-}
 
 class CategoryProvider with ChangeNotifier {
   final SecureStorageService _storageService = SecureStorageService();
-  
   final String _baseUrl = 'http://localhost:3000';
 
   List<Category> _categories = [];
@@ -60,21 +48,74 @@ class CategoryProvider with ChangeNotifier {
     }
   }
 
-  // Tworzenie nowej kategorii
-  Future<bool> addCategory(String name) async {
+  // Usuwanie kategorii
+  Future<bool> deleteCategory(int id) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
       final token = await _storageService.getToken();
+      final response = await http.delete(
+        Uri.parse('$_baseUrl/categories/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // Usuwamy kategorię z lokalnej listy
+        _categories.removeWhere((cat) => cat.id == id);
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = 'Nie udało się usunąć kategorii';
+      }
+    } catch (e) {
+      _errorMessage = 'Błąd połączenia z serwerem';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return false;
+  }
+
+  // Tworzenie nowej kategorii
+  Future<bool> addCategory({
+    required String name,
+    required Color color,
+    required bool hasContent,
+    required bool hasPhotos,
+    required bool hasDate,
+    required bool defaultToCurrentDate,
+    required bool allowTimeRange,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final token = await _storageService.getToken();
+
+      final String hexColor =
+          '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
+
       final response = await http.post(
         Uri.parse('$_baseUrl/categories'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({'name': name}),
+        body: jsonEncode({
+          'name': name,
+          'color': hexColor,
+          'hasContent': hasContent,
+          'hasPhotos': hasPhotos,
+          'hasDate': hasDate,
+          'defaultToCurrentDate': defaultToCurrentDate,
+          'allowTimeRange': allowTimeRange,
+        }),
       );
 
       if (response.statusCode == 201) {

@@ -25,7 +25,9 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException('Użytkownik o podanym emailu lub loginie już istnieje.');
+      throw new ConflictException(
+        'Użytkownik o podanym emailu lub loginie już istnieje.',
+      );
     }
 
     //Hashowanie hasła
@@ -64,7 +66,7 @@ export class AuthService {
 
     //Generowanie tokenu JWT
     const payload = { sub: user.id, email: user.email, login: user.login };
-    
+
     return {
       access_token: await this.jwtService.signAsync(payload),
     };

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'providers/auth_provider.dart';
 import 'services/secure_storage_service.dart';
 import 'screens/login_screen.dart';
@@ -11,8 +12,7 @@ import 'providers/entry_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Sprawdzamy token przed uruchomieniem aplikacji
+
   final storage = SecureStorageService();
   final initialToken = await storage.getToken();
 
@@ -23,8 +23,8 @@ class MyApp extends StatelessWidget {
   final String? initialToken;
   const MyApp({super.key, this.initialToken});
 
-@override
-Widget build(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
@@ -32,7 +32,6 @@ Widget build(BuildContext context) {
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => EntryProvider()),
       ],
-
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
@@ -41,7 +40,16 @@ Widget build(BuildContext context) {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
-            home: initialToken != null ? const HomeScreen() : const LoginScreen(),
+            builder: (context, child) {
+              return MediaQuery(
+                data: MediaQuery.of(context)
+                    .copyWith(textScaler: const TextScaler.linear(0.85)),
+                child: child!,
+              );
+            },
+            home: initialToken != null
+                ? const HomeScreen()
+                : const LoginScreen(),
           );
         },
       ),

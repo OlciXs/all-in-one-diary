@@ -8,28 +8,42 @@ generator client {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  login      String     @unique
+  id         Int      @id @default(autoincrement())
+  login      String   @unique
   password   String
-  email      String     @unique
+  email      String   @unique
   categories Category[]
   entries    Entry[]
 }
 
 model Category {
-  id      Int     @id @default(autoincrement())
-  name    String
-  userId  Int
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  entries Entry[]
+  id                   Int      @id @default(autoincrement())
+  name                 String
+  color                String   @default("#2196F3") // Domyślnie niebieski HEX
+  hasContent           Boolean  @default(true)
+  hasPhotos            Boolean  @default(true)
+  hasDate              Boolean  @default(true)
+  defaultToCurrentDate Boolean  @default(true)
+  allowTimeRange       Boolean  @default(false)
+  userId               Int
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries              Entry[]
 }
 
 model Entry {
-  id         Int      @id @default(autoincrement())
-  title      String
-  content    String
-  userId     Int
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  id           Int      @id @default(autoincrement())
+  title        String
+  content      String?
+  startDate    DateTime @default(now())
+  endDate      DateTime?
+  isAllDay     Boolean  @default(true)
+  
+  //pola na zdjęcia i miniaturki
+  photoUrl     String?
+  thumbnailUrl String?
+
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId   Int
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }
