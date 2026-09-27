@@ -2,6 +2,12 @@
 
 Aplikacja typu pamiętnik/dziennik, pozwalająca użytkownikom na śledzenie wspomnień, kategoryzowanie wpisów, przeglądanie ich w interaktywnym kalendarzu oraz dołączanie zdjęć. Projekt składa się z backendu REST API w NestJS oraz aplikacji mobilnej w Flutterze.
 
+# Film pokazowy
+
+
+https://github.com/user-attachments/assets/407ca963-2452-46cc-98c3-273e98785f8b
+
+
 # Technologie
 
 Frontend (Aplikacja mobilna)
