@@ -42,19 +42,39 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return 'http://localhost:3000';
   }
 
-  List<Entry> _getEntriesForDay(DateTime day, List<Entry> allEntries) {
-    return allEntries.where((entry) {
-      final entryDate = entry.startDate;
-      final isSameDayYear = isSameDay(entryDate, day);
+List<Entry> _getEntriesForDay(DateTime day, List<Entry> allEntries) {
+  final targetDay = DateTime(day.year, day.month, day.day);
 
-      if (!isSameDayYear) return false;
+  return allEntries.where((entry) {
+    // Filtrowanie według wybranej kategorii
+    if (_selectedCategoryId != null && entry.categoryId != _selectedCategoryId) {
+      return false;
+    }
 
-      if (_selectedCategoryId != null) {
-        return entry.categoryId == _selectedCategoryId;
-      }
-      return true;
-    }).toList();
-  }
+    final start = DateTime(
+      entry.startDate.year,
+      entry.startDate.month,
+      entry.startDate.day,
+    );
+
+    // Jeśli wpis nie ma ustawionej daty końcowej, sprawdzamy tylko dzień początkowy
+    if (entry.endDate == null) {
+      return isSameDay(start, targetDay);
+    }
+
+    final end = DateTime(
+      entry.endDate!.year,
+      entry.endDate!.month,
+      entry.endDate!.day,
+    );
+
+    // Sprawdzamy czy dany dzień mieści się w przedziale [start, end]
+    final isAfterOrEqualStart = targetDay.isAfter(start) || isSameDay(targetDay, start);
+    final isBeforeOrEqualEnd = targetDay.isBefore(end) || isSameDay(targetDay, end);
+
+    return isAfterOrEqualStart && isBeforeOrEqualEnd;
+  }).toList();
+}
 
   @override
   Widget build(BuildContext context) {
